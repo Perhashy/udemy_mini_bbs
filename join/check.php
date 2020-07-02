@@ -1,3 +1,28 @@
+<?php
+session_start();
+require('../dbconnect.php');
+
+// セッションが保存されていない時index.phpを呼び出し
+if (!isset($_SESSION['join'])) {
+	header('Location: index.php');
+	exit();
+}
+if (!empty($_POST)) {
+	$statement = $db->prepare('INSERT INTO users SET name=?, email=?, password=?, image=?, created=NOW()');
+	$statement->execute(array(
+		$_SESSION['join']['name'],
+		$_SESSION['join']['email'],
+		sha1($_SESSION['join']['password']),
+		$_SESSION['join']['image']
+	));
+	// セッションを削除
+	unset($_SESSION['join']);
+	header('Location: thanks.php');
+	exit();
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -21,16 +46,22 @@
 	<dl>
 		<dt>ニックネーム</dt>
 		<dd>
-        </dd>
+			<?php print(htmlspecialchars($_SESSION['join']['name'], ENT_QUOTES)); ?>
+    </dd>
 		<dt>メールアドレス</dt>
 		<dd>
-        </dd>
+			<?php print(htmlspecialchars($_SESSION['join']['email'], ENT_QUOTES)); ?>
+    </dd>
 		<dt>パスワード</dt>
 		<dd>
 		【表示されません】
 		</dd>
 		<dt>写真など</dt>
 		<dd>
+			<!-- セッションに画像ファイルが空でない場合 -->
+			<?php if ($_SESSION['join']['image'] !== ''):?>
+				<img src="../user_image/<?php print(htmlspecialchars($_SESSION['join']['image'],ENT_QUOTES)); ?>">
+			<?php endif;?>
 		</dd>
 	</dl>
 	<div><a href="index.php?action=rewrite">&laquo;&nbsp;書き直す</a> | <input type="submit" value="登録する" /></div>
