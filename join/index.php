@@ -17,9 +17,28 @@ if (!empty($_POST)) {
 	if ($_POST['password'] === '') {
 		$error['password'] = 'blank';
 	}
-	
+
+	// アップロードファイル名の取得
+	$fileName = $_FILES['image']['name'];
+	// $fileNameがある場合
+	if (!empty($fileName)) {
+		// 拡張子の抜き出し
+		$ext = substr($fileName, -3);
+		// jpg,gif,png以外の場合エラー
+		if ($ext != 'jpg' && $ext != 'gif' && $ext != 'png') {
+			$error['image'] = 'type';
+		}
+	}
+
+	// $errorがない場合
 	if (empty($error)) {
+		// ファイル名作成
+		$image = date('YmdHis') . $_FILES['image']['name'];
+		// 画像をフォルダに保存
+		move_uploaded_file($_FILES['image']['tmp_name'], '../user_image/' . $image);
 		$_SESSION['join'] = $_POST;
+		// ファイル名をセッションに保存
+		$_SESSION['join']['image'] = $image;
 		header('Location: check.php');
 		exit();
 	}
@@ -78,8 +97,15 @@ if ($_REQUEST['action'] === 'rewrite' && isset($_SESSION['join'])) {
         </dd>
 		<dt>写真など</dt>
 		<dd>
-        	<input type="file" name="image" size="35" value="test"  />
-        </dd>
+					<input type="file" name="image" size="35" value="test"  />
+					<?php if ($error['image'] === 'type'): ?>
+						<p class="error">※写真などは「.gif」または「.jpg」「.png」の画像を指定してください</p>
+					<?php endif; ?>
+					<!-- エラーがある時、画像の再指定を促す -->
+					<?php if (!empty($error)): ?>
+						<p class="error">※恐れ入りますが、画像を改めて指定してください</p>
+					<?php endif; ?>
+    </dd>
 	</dl>
 	<div><input type="submit" value="入力内容を確認する" /></div>
 </form>
