@@ -1,3 +1,14 @@
+<?php
+session_start();
+
+// セッションが保存されていない時index.phpを呼び出し
+if (!isset($_SESSION['join'])) {
+	header('Location: index.php');
+	exit();
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
