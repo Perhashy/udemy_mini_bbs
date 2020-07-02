@@ -1,9 +1,23 @@
 <?php
 session_start();
+require('../dbconnect.php');
 
 // セッションが保存されていない時index.phpを呼び出し
 if (!isset($_SESSION['join'])) {
 	header('Location: index.php');
+	exit();
+}
+if (!empty($_POST)) {
+	$statement = $db->prepare('INSERT INTO users SET name=?, email=?, password=?, image=?, created=NOW()');
+	$statement->execute(array(
+		$_SESSION['join']['name'],
+		$_SESSION['join']['email'],
+		sha1($_SESSION['join']['password']),
+		$_SESSION['join']['image']
+	));
+	// セッションを削除
+	unset($_SESSION['join']);
+	header('Location: thanks.php');
 	exit();
 }
 ?>
