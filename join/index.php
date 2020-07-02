@@ -1,9 +1,11 @@
 <?php
+session_start();
+
 if (!empty($_POST)) {
 	if ($_POST['name'] === '') {
 		$error['name'] = 'blank';
 	}
-	
+
 	if ($_POST['email'] === '') {
 		$error['email'] = 'blank';
 	}
@@ -17,6 +19,7 @@ if (!empty($_POST)) {
 	}
 	
 	if (empty($error)) {
+		$_SESSION['join'] = $_POST;
 		header('Location: check.php');
 		exit();
 	}
