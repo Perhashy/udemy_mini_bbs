@@ -24,6 +24,11 @@ if (!empty($_POST)) {
 		exit();
 	}
 }
+
+// URLにaction=rewriteがある場合（書き直し）、セッション内容をPOSTに
+if ($_REQUEST['action'] === 'rewrite' && isset($_SESSION['join'])) {
+	$_POST = $_SESSION['join'];
+}
 ?>
 
 <!DOCTYPE html>
