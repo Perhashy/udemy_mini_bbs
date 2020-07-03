@@ -2,7 +2,12 @@
 session_start();
 require('dbconnect.php');
 
+if ($_COOKIE['email'] !== '') {
+  $email = $_COOKIE['email'];
+}
+
 if (!empty($_POST)) {
+  $email = $_POST['email'];
   if ($_POST['email'] !== '' && $_POST['password'] !== '') {
     $login = $db->prepare('SELECT * FROM users WHERE email=? AND password=?');
     $login->execute(array($_POST['email'], sha1($_POST['password'])));
@@ -11,6 +16,11 @@ if (!empty($_POST)) {
     if ($user) {
       $_SESSION['id'] = $user['id'];
       $_SESSION['time'] = time();
+
+      if ($_POST['save'] === 'on') {
+        setcookie('email', $_POST['email'], time()+60*60*24*14);
+      }
+
       header('Location: index.php');
       exit();
     } else {
@@ -45,7 +55,7 @@ if (!empty($_POST)) {
       <dl>
         <dt>メールアドレス</dt>
         <dd>
-          <input type="text" name="email" size="35" maxlength="255" value="<?php echo htmlspecialchars($_POST['email']); ?>" />
+          <input type="text" name="email" size="35" maxlength="255" value="<?php echo htmlspecialchars($email, ENT_QUOTES); ?>" />
           <?php if ($error['login'] === 'blank'): ?>
             <p class="error">※メールアドレスとパスワードをご記入ください</p>
           <?php endif; ?>
@@ -56,7 +66,7 @@ if (!empty($_POST)) {
         </dd>
         <dt>パスワード</dt>
         <dd>
-          <input type="password" name="password" size="35" maxlength="255" value="<?php echo htmlspecialchars($_POST['password']); ?>" />
+          <input type="password" name="password" size="35" maxlength="255" value="<?php echo htmlspecialchars($_POST['password'], ENT_QUOTES); ?>" />
         </dd>
         <dt>ログイン情報の記録</dt>
         <dd>
