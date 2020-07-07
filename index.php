@@ -27,7 +27,22 @@ if (!empty($_POST)) {
   }
 }
 
-$posts = $db->query('SELECT u.name, u.image, p.* FROM users u, posts p WHERE u.id=p.user_id ORDER BY p.created DESC');
+$page = $_REQUEST['page'];
+if ($page == '') {
+  $page = 1;
+}
+$page = max($page, 1);
+
+$counts = $db->query('SELECT COUNT(*) AS cnt FROM posts');
+$cnt = $counts->fetch();
+$maxPage = ceil($cnt['cnt'] / 5);
+$page = min($page, $maxPage);
+
+$start = ($page - 1) * 5;
+
+$posts = $db->prepare('SELECT u.name, u.image, p.* FROM users u, posts p WHERE u.id=p.user_id ORDER BY p.created DESC LIMIT ?,5');
+$posts->bindparam(1, $start, PDO::PARAM_INT);
+$posts->execute();
 
 if (isset($_REQUEST['res'])) {
   $response = $db->prepare('SELECT u.name, u.image, p.* FROM users u, posts p WHERE u.id=p.user_id AND p.id=?');
@@ -90,8 +105,16 @@ if (isset($_REQUEST['res'])) {
   <?php endforeach;?>
 
 <ul class="paging">
-<li><a href="index.php?page=">前のページへ</a></li>
-<li><a href="index.php?page=">次のページへ</a></li>
+  <?php if ($page > 1): ?>
+    <li><a href="index.php?page=<?php print($page - 1); ?>">前のページへ</a></li>
+  <?php else: ?>
+    <li>前のページへ</li>
+  <?php endif; ?>
+  <?php if ($page < $maxPage): ?>
+    <li><a href="index.php?page=<?php print($page + 1); ?>">次のページへ</a></li>
+  <?php else: ?>
+    <li>次のページへ</li>
+  <?php endif; ?>
 </ul>
   </div>
 </div>
